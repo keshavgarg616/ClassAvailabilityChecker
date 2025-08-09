@@ -8,8 +8,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 import time
 from dotenv import load_dotenv
+import platform
 import os
-import sys
 
 load_dotenv()
 
@@ -24,7 +24,13 @@ chrome_options.add_argument("--no-default-browser-check")
 chrome_options.add_argument("--disable-extensions")
 chrome_options.add_argument("--disable-infobars")
 
-service = Service("./chromedriver.exe")
+driver_binary = "chromedriver.exe" if platform.system() == "Windows" else "chromedriver"
+if platform.system() != "Windows":
+    # If chromedriver isn't in the current directory, try system path
+    if not os.path.exists(driver_binary):
+        driver_binary = "/opt/homebrew/bin/chromedriver"  # default brew path
+    os.system(f"chmod +x {driver_binary}")
+service = Service(driver_binary)
 
 driver = webdriver.Chrome(service=service, options=chrome_options)
 print("-------------------- Chrome driver initialized successfully --------------------")
