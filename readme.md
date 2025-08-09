@@ -1,5 +1,7 @@
+.env
+
 ```env
 email=
-passwd
+passwd=
 course_id=
 ```
