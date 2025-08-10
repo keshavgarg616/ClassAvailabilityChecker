@@ -7,11 +7,9 @@ Currently supports fetching enrollment totals, capacity, and open seats for one 
 
 -   ✅ Works on Windows and macOS
 -   ✅ Uses your existing Chrome profile (avoids repeated logins/MFA)
--   ✅ Automatically switches into SPIRE’s hidden iframe to interact with elements
 -   ✅ Reads .env variables for login credentials & class ID
--   🛠 Coming Soon:
-    -   Email notifications when a class has open seats
-    -   Support for checking multiple classes in one run
+-   ✅ Email notifications when seats become available in your tracked courses
+-   ✅ Multi-class monitoring — track availability for multiple classes in a single run
 
 ## Requirements
 
@@ -30,9 +28,21 @@ Currently supports fetching enrollment totals, capacity, and open seats for one 
     ```env
     email=your_email@umass.edu
     passwd=your_password
-    class_id=12345
+    gmail_user=your_gmail_address@gmail.com
+    gmail_password=your_gmail_app_password
     ```
-4. ChromeDriver
+    On Getting Gmail App Password:
+    1. Go to your Google Account settings → Security.
+    2. Turn on 2-Step Verification if it’s not already enabled.
+    3. Under "App passwords", generate a new password.
+    4. Choose App = "Mail", Device = "Other", name it something like ClassChecker.
+    5. Copy the generated password and paste it into gmail_password in .env.
+4. **Set up** `course_ids.txt` in the project root with each course ID on its own line. An example file is given below:
+    ```course_ids
+    36378
+    23938
+    ```
+5. ChromeDriver
 
 -   Windows: download [Chrome Driver](https://googlechromelabs.github.io/chrome-for-testing/#stable)
     and place chromedriver.exe in the project folder

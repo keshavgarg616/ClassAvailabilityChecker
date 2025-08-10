@@ -1,3 +1,4 @@
 selenium_profile/
 .env
 *.exe
+course_ids.txt
