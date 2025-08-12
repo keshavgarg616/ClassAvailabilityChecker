@@ -30,6 +30,7 @@ Currently supports fetching enrollment totals, capacity, and open seats for one 
     passwd=your_password
     gmail_user=your_gmail_address@gmail.com
     gmail_password=your_gmail_app_password
+    headless=false
     ```
     On Getting Gmail App Password:
     1. Go to your Google Account settings → Security.

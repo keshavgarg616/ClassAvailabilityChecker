@@ -11,6 +11,7 @@ import smtplib, ssl
 from dotenv import load_dotenv
 import platform
 import os
+import sys
 
 load_dotenv()
 
@@ -27,6 +28,12 @@ selenium_profile = os.path.join(os.getcwd(), "selenium_profile")
 os.makedirs(selenium_profile, exist_ok=True)
 
 chrome_options = Options()
+try:
+    if os.getenv("headless") == "true":
+        chrome_options.add_argument("--headless=new")
+except:
+    pass
+chrome_options.add_argument("--window-size=1920,1080")
 chrome_options.add_argument(f"--user-data-dir={selenium_profile}")
 chrome_options.add_argument("--profile-directory=Default")  # Optional
 chrome_options.add_argument("--no-first-run")
@@ -45,7 +52,7 @@ service = Service(driver_binary)
 driver = webdriver.Chrome(service=service, options=chrome_options)
 print("-------------------- Chrome driver initialized successfully --------------------")
 driver.get("https://www.spire.umass.edu/psc/heproda/EMPLOYEE/SA/c/NUI_FRAMEWORK.PT_LANDINGPAGE.GBL")
-wait = WebDriverWait(driver, 1000)
+wait = WebDriverWait(driver, 100)
 
 # Wait for email field
 email_field = wait.until(EC.presence_of_element_located((By.NAME, "loginfmt")))
@@ -58,13 +65,56 @@ time.sleep(1)  # Wait for a second to ensure the password is entered correctly
 sign_in_button = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
 sign_in_button.click()
 
+time.sleep(1) 
+
 print("Waiting for the page to load...")
-if "Don't ask again for 30 days" in driver.page_source:
+if ("30 days" in driver.page_source or "Verify your identity" in driver.page_source or "Approve sign" in driver.page_source):
+    print("Going through 2 factor auth")
+    if os.getenv("headless") == "true":
+        with open(".env", "r") as f:
+            lines = f.readlines()
+        with open(".env", "w") as f:
+            for line in lines:
+                if line.startswith("headless="):
+                    f.write(f"headless=false\n")
+                else:
+                    f.write(line)
+        print("Setting next run to headless=false for 2 factor authentication")
+        driver.quit()
+        sys.exit()
     print("Checkbox found")
     dont_ask_30_days_chkbx = wait.until(EC.presence_of_element_located((By.ID, "idChkBx_SAOTCAS_TD")))
     dont_ask_30_days_chkbx.click()
+else: 
+    print("No 2 factor authentication required")
+    if os.getenv("headless") == "false":
+        print("Setting next run to headless=true")
+        with open(".env", "r") as f:
+            lines = f.readlines()
+        with open(".env", "w") as f:
+            for line in lines:
+                if line.startswith("headless="):
+                    f.write(f"headless=true\n")
+                else:
+                    f.write(line)
+    
 if "Stay signed in?" not in driver.page_source:
-    wait.until(EC.url_changes(driver.current_url))
+    try:
+        wait.until(EC.url_changes(driver.current_url))
+    except:
+        print("Timed out waiting for URL to change")
+        if os.getenv("headless") == "true":
+            with open(".env", "r") as f:
+                lines = f.readlines()
+            with open(".env", "w") as f:
+                for line in lines:
+                    if line.startswith("headless="):
+                        f.write(f"headless=false\n")
+                    else:
+                        f.write(line)
+            print("Setting next run to headless=false for 2 factor authentication")
+            driver.quit()
+            sys.exit()
 
 stay_signed_in_button = wait.until(EC.element_to_be_clickable((By.ID, "idSIButton9")))
 stay_signed_in_button.click()
